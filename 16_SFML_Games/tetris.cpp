@@ -61,10 +61,10 @@ void drawTiles(int t_posX, int t_posY, int t_tile, sf::Sprite t_tileSprite, sf::
     t_window.draw(t_tileSprite);
 }
 
-void draw(sf::Sprite t_tileSprite, sf::RenderWindow &t_window, sf::Sprite t_background, int t_color, sf::Sprite t_frame)
+void draw(sf::RenderWindow &t_window)
 {
     t_window.clear(Color::White);
-    t_window.draw(t_background);
+    t_window.draw(background);
 
     for (int lengthCount = 0; lengthCount < LENGTH; lengthCount++)
     {
@@ -77,7 +77,7 @@ void draw(sf::Sprite t_tileSprite, sf::RenderWindow &t_window, sf::Sprite t_back
             drawTiles(widthCount * TILE_SIZE,
                 lengthCount * TILE_SIZE,
                 gameGrid[lengthCount][widthCount] * TILE_SIZE,
-                t_tileSprite,
+                tiles,
                 t_window);
         }
     }
@@ -86,12 +86,12 @@ void draw(sf::Sprite t_tileSprite, sf::RenderWindow &t_window, sf::Sprite t_back
     {
         drawTiles(currentBlock[tileNum].x * TILE_SIZE,
             currentBlock[tileNum].y * TILE_SIZE,
-            t_color * TILE_SIZE,
-            t_tileSprite,
+            colorNum * TILE_SIZE,
+            tiles,
             t_window);
     }
 
-    t_window.draw(t_frame);
+    t_window.draw(frame);
     t_window.display();
 }
 
@@ -130,6 +130,10 @@ void processInputs(sf::RenderWindow &t_window)
                 dx = 1;
             }
         }
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Down))
+    {
+        delay = 0.05; // Increases Movement Speed
     }
 }
 
@@ -180,6 +184,52 @@ void blockRotation()
     }
 }
 
+void blockMove()
+{
+    for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
+    {
+        backupBlock[tileNum] = currentBlock[tileNum];
+        currentBlock[tileNum].x += dx;
+    }
+    if (checkValidMove() == false)
+    {
+        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
+        {
+            currentBlock[tileNum] = backupBlock[tileNum];
+        }
+    }
+}
+
+void trackTimer()
+{
+    if (timer > delay)
+    {
+        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
+        {
+            backupBlock[tileNum] = currentBlock[tileNum];
+            currentBlock[tileNum].y += 1;
+        }
+
+        if (checkValidMove() == false)
+        {
+            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
+            {
+                gameGrid[backupBlock[tileNum].y][backupBlock[tileNum].x] = colorNum;
+            }
+
+            colorNum = 1 + (rand() % MAX_FIGURES);
+            int figureType = rand() % MAX_FIGURES;
+            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
+            {
+                currentBlock[tileNum].x = figures[figureType][tileNum] % 2;
+                currentBlock[tileNum].y = figures[figureType][tileNum] / 2;
+            }
+        }
+
+        timer = 0;
+    }
+}
+
 int tetris()
 {
     srand(time(0));     
@@ -197,61 +247,20 @@ int tetris()
 
         processInputs(window);
 
-        if (Keyboard::isKeyPressed(Keyboard::Down))
-        {
-            delay = 0.05; // Increases Movement Speed
-        }
-
         //// <- Move -> ///
-        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-        {
-            backupBlock[tileNum] = currentBlock[tileNum];
-            currentBlock[tileNum].x += dx;
-        }
-        if (checkValidMove() == false)
-        {
-            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-            {
-                currentBlock[tileNum] = backupBlock[tileNum];
-            }
-        }
+        blockMove();
 
         //////Rotate//////
         blockRotation();
 
         ///////Tick//////
-        if (timer > delay)
-        {
-            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-            {
-                backupBlock[tileNum] = currentBlock[tileNum];
-                currentBlock[tileNum].y += 1;
-            }
-
-            if (checkValidMove() == false)
-            {
-                for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-                {
-                    gameGrid[backupBlock[tileNum].y][backupBlock[tileNum].x] = colorNum;
-                }
-
-                colorNum = 1 + (rand() % MAX_FIGURES);
-                int figureType = rand() % MAX_FIGURES;
-                for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-                {
-                    currentBlock[tileNum].x = figures[figureType][tileNum] % 2;
-                    currentBlock[tileNum].y = figures[figureType][tileNum] / 2;
-                }
-            }
-
-            timer = 0;
-        }
+        trackTimer();
 
         ///////check lines//////////
         checkLines();
 
         /////////draw//////////
-        draw(tiles, window, background, colorNum, frame);
+        draw(window);
     }
     return 0;
 }
