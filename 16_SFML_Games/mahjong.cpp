@@ -3,9 +3,9 @@
 #include <time.h>
 using namespace sf;
 
-int field[50][50][50] = {0};
+int gameGrid[50][50][50] = {0};
 
-int& f(int x,int y,int z){return field[y+2][x+2][z];}
+int& f(int x,int y,int z){return gameGrid[y+2][x+2][z];}
 int& f(Vector3i v){return f(v.x,v.y,v.z);}
 
 

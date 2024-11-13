@@ -5,7 +5,7 @@ using namespace sf;
 const int W=600;
 const int H=480;
 int speed = 4;
-bool field[W][H]={0};
+bool gameGrid[W][H]={0};
 
 struct player
 { int x,y,dir;
@@ -78,10 +78,10 @@ int tron()
         for(int i=0;i<speed;i++)
         {
             p1.tick(); p2.tick();
-            if (field[p1.x][p1.y]==1) Game=0; 
-            if (field[p2.x][p2.y]==1) Game=0;
-            field[p1.x][p1.y]=1; 
-            field[p2.x][p2.y]=1;
+            if (gameGrid[p1.x][p1.y]==1) Game=0; 
+            if (gameGrid[p2.x][p2.y]==1) Game=0;
+            gameGrid[p1.x][p1.y]=1; 
+            gameGrid[p2.x][p2.y]=1;
     
             CircleShape c(3);
             c.setPosition(p1.x,p1.y); c.setFillColor(p1.color);    t.draw(c);

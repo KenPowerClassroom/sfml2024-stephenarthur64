@@ -2,10 +2,10 @@
 #include <time.h>
 using namespace sf;
 
-int N=30,M=20;
+int WIDTH=30,LENGTH=20;
 int sz=16;
-int w = sz*N;
-int h = sz*M;
+int w = sz*WIDTH;
+int h = sz*LENGTH;
 
 int dir,num=4;
 
@@ -26,10 +26,10 @@ void Tick()
     if (dir==3) s[0].y-=1;   
 
     if ((s[0].x==f.x) && (s[0].y==f.y)) 
-     {num++; f.x=rand()%N; f.y=rand()%M;}
+     {num++; f.x=rand()%WIDTH; f.y=rand()%LENGTH;}
 
-    if (s[0].x>N) s[0].x=0;  if (s[0].x<0) s[0].x=N;
-    if (s[0].y>M) s[0].y=0;  if (s[0].y<0) s[0].y=M;
+    if (s[0].x>WIDTH) s[0].x=0;  if (s[0].x<0) s[0].x=WIDTH;
+    if (s[0].y>LENGTH) s[0].y=0;  if (s[0].y<0) s[0].y=LENGTH;
  
     for (int i=1;i<num;i++)
      if (s[0].x==s[i].x && s[0].y==s[i].y)  num=i;
@@ -77,8 +77,8 @@ int snake()
    ////// draw  ///////
     window.clear();
 
-    for (int i=0; i<N; i++) 
-      for (int j=0; j<M; j++) 
+    for (int i=0; i<WIDTH; i++) 
+      for (int j=0; j<LENGTH; j++) 
         { sprite1.setPosition(i*sz, j*sz);  window.draw(sprite1); }
 
     for (int i=0;i<num;i++)

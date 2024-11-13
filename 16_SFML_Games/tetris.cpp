@@ -2,13 +2,15 @@
 #include <time.h>
 using namespace sf;
 
-const int M = 20;
-const int N = 10;
+const int LENGTH = 20;
+const int WIDTH = 10;
 
-int field[M][N] = {0};
+int gameGrid[LENGTH][WIDTH] = {0};
 
 struct Point
-{int x,y;} a[4], b[4];
+{
+    int x,y;
+} currentBlock[4], backupBlock[4];
 
 int figures[7][4] =
 {
@@ -21,21 +23,21 @@ int figures[7][4] =
     2,3,4,5, // O
 };
 
-bool check()
+bool checkValidMove()
 {
    for (int i=0;i<4;i++)
    {
-       if (a[i].x < 0 || a[i].x >= N || a[i].y >= M) 
+       if (currentBlock[i].x < 0 || currentBlock[i].x >= WIDTH || currentBlock[i].y >= LENGTH) 
        {
-           return 0;
+           return false;
        }
-       else if (field[a[i].y][a[i].x]) 
+       else if (gameGrid[currentBlock[i].y][currentBlock[i].x]) 
        {
-           return 0;
+           return false;
        }
    }
 
-   return 1;
+   return true;
 };
 
 
@@ -45,14 +47,16 @@ int tetris()
 
     RenderWindow window(VideoMode(320, 480), "The Game!");
 
-    Texture t1,t2,t3;
-    t1.loadFromFile("images/tetris/tiles.png");
-    t2.loadFromFile("images/tetris/background.png");
-    t3.loadFromFile("images/tetris/frame.png");
+    Texture tilesTexture,backgroundTexture,frameTexture;
+    tilesTexture.loadFromFile("images/tetris/tiles.png");
+    backgroundTexture.loadFromFile("images/tetris/background.png");
+    frameTexture.loadFromFile("images/tetris/frame.png");
 
-    Sprite s(t1), background(t2), frame(t3);
+    Sprite tiles(tilesTexture), background(backgroundTexture), frame(frameTexture);
 
-    int dx=0; bool rotate=0; int colorNum=1;
+    int dx=0; 
+    bool rotate = false; 
+    int colorNum=1;
     float timer=0,delay=0.3; 
 
     Clock clock;
@@ -63,63 +67,66 @@ int tetris()
         clock.restart();
         timer+=time;
 
-        Event e;
-        while (window.pollEvent(e))
+        Event inputEvent;
+        while (window.pollEvent(inputEvent))
         {
-            if (e.type == Event::Closed)
+            if (inputEvent.type == Event::Closed)
             {
                 window.close();
             }
 
-            if (e.type == Event::KeyPressed)
+            if (inputEvent.type == Event::KeyPressed)
             {
-                if (e.key.code == Keyboard::Up) 
+                if (inputEvent.key.code == Keyboard::Up) 
                 {
                     rotate = true;
                 }
-                else if (e.key.code == Keyboard::Left) 
+                else if (inputEvent.key.code == Keyboard::Left) 
                 {
                     dx = -1;
                 }
-                else if (e.key.code == Keyboard::Right) 
+                else if (inputEvent.key.code == Keyboard::Right) 
                 {
                     dx = 1;
                 }
             }
         }
 
-    if (Keyboard::isKeyPressed(Keyboard::Down)) delay=0.05;
+    if (Keyboard::isKeyPressed(Keyboard::Down)) 
+    {
+        delay = 0.05; // Increases Movement Speed
+    }
 
     //// <- Move -> ///
-    for (int i=0;i<4;i++)  
+    for (int tileNum=0;tileNum<4;tileNum++)  
     { 
-        b[i]=a[i]; 
-        a[i].x+=dx; 
+        backupBlock[tileNum]=currentBlock[tileNum]; 
+        currentBlock[tileNum].x+=dx; 
     }
-    if (!check()) 
+    if (checkValidMove() == false) 
     {
         for (int i = 0; i < 4; i++) 
         {
-            a[i] = b[i];
+            currentBlock[i] = backupBlock[i];
         }
     }
 
     //////Rotate//////
     if (rotate)
       {
-        Point p = a[1]; //center of rotation
-        for (int i=0;i<4;i++)
+        Point centreRotation = currentBlock[1]; //center of rotation
+        for (int tileNum=0;tileNum<4;tileNum++)
         {
-            int x = a[i].y-p.y;
-            int y = a[i].x-p.x;
-            a[i].x = p.x - x;
-            a[i].y = p.y + y;
+            int x = currentBlock[tileNum].y-centreRotation.y;
+            int y = currentBlock[tileNum].x-centreRotation.x;
+            currentBlock[tileNum].x = centreRotation.x - x;
+            currentBlock[tileNum].y = centreRotation.y + y;
         }
-        if (!check()) 
+        if (checkValidMove() == false) 
         {
             for (int i = 0; i < 4; i++) 
             {
-                a[i] = b[i];
+                currentBlock[i] = backupBlock[i];
             }
         }
       }
@@ -127,25 +134,25 @@ int tetris()
     ///////Tick//////
     if (timer>delay)
       {
-        for (int i=0;i<4;i++) 
+        for (int tileNum=0;tileNum<4;tileNum++) 
         { 
-            b[i]=a[i]; 
-            a[i].y+=1; 
+            backupBlock[tileNum]=currentBlock[tileNum]; 
+            currentBlock[tileNum].y+=1; 
         }
 
-        if (!check())
+        if (checkValidMove() == false)
         {
-            for (int i=0;i<4;i++) 
+            for (int tileNum=0;tileNum<4;tileNum++) 
             {
-                field[b[i].y][b[i].x] = colorNum;
+                gameGrid[backupBlock[tileNum].y][backupBlock[tileNum].x] = colorNum;
             }
 
-            colorNum=1+rand()%7;
-            int n=rand()%7;
-            for (int i=0;i<4;i++)
+            colorNum = 1 + (rand()%7);
+            int figureType=rand()%7;
+            for (int tileNum=0;tileNum<4;tileNum++)
             {
-                a[i].x = figures[n][i] % 2;
-                a[i].y = figures[n][i] / 2;
+                currentBlock[tileNum].x = figures[figureType][tileNum] % 2;
+                currentBlock[tileNum].y = figures[figureType][tileNum] / 2;
             }
         }
 
@@ -153,48 +160,53 @@ int tetris()
       }
 
     ///////check lines//////////
-    int k=M-1;
-    for (int i=M-1;i>0;i--)
+    int currentLine=LENGTH-1;
+    for (int lengthCount=LENGTH-1;lengthCount>0;lengthCount--)
     {
         int count=0;
-        for (int j=0;j<N;j++)
+        for (int widthCount=0;widthCount<WIDTH;widthCount++)
         {
-            if (field[i][j]) count++;
-            field[k][j]=field[i][j];
+            if (gameGrid[lengthCount][widthCount]) 
+            {
+                count++;
+            }
+            gameGrid[currentLine][widthCount]=gameGrid[lengthCount][widthCount];
         }
-        if (count<N) 
+        if (count<WIDTH) 
         {
-            k--;
+            currentLine--;
         }
     }
 
-    dx=0; rotate=0; delay=0.3;
+    dx=0; 
+    rotate=0; 
+    delay=0.3;
 
     /////////draw//////////
     window.clear(Color::White);    
     window.draw(background);
           
-    for (int i=0;i<M;i++)
+    for (int lengthCount=0;lengthCount<LENGTH;lengthCount++)
     {
-        for (int j = 0; j < N; j++)
+        for (int widthCount = 0; widthCount < WIDTH; widthCount++)
         {
-            if (field[i][j] == 0) 
+            if (gameGrid[lengthCount][widthCount] == 0) 
             {
                 continue;
             }
-            s.setTextureRect(IntRect(field[i][j] * 18, 0, 18, 18));
-            s.setPosition(j * 18, i * 18);
-            s.move(28, 31); //offset
-            window.draw(s);
+            tiles.setTextureRect(IntRect(gameGrid[lengthCount][widthCount] * 18, 0, 18, 18));
+            tiles.setPosition(widthCount * 18, lengthCount * 18);
+            tiles.move(28, 31); //offset
+            window.draw(tiles);
         }
     }
 
-    for (int i=0;i<4;i++)
+    for (int tileNum=0;tileNum<4;tileNum++)
       {
-        s.setTextureRect(IntRect(colorNum*18,0,18,18));
-        s.setPosition(a[i].x*18,a[i].y*18);
-        s.move(28,31); //offset
-        window.draw(s);
+        tiles.setTextureRect(IntRect(colorNum*18,0,18,18));
+        tiles.setPosition(currentBlock[tileNum].x*18,currentBlock[tileNum].y*18);
+        tiles.move(28,31); //offset
+        window.draw(tiles);
       }
 
     window.draw(frame);
