@@ -4,15 +4,20 @@ using namespace sf;
 
 const int LENGTH = 20;
 const int WIDTH = 10;
+const int TILE_SIZE = 18;
+const int MAX_TILES = 4;
+const int MAX_FIGURES = 7;
+const int OFFSET_X = 28;
+const int OFFSET_Y = 31;
 
 int gameGrid[LENGTH][WIDTH] = {0};
 
 struct Point
 {
     int x,y;
-} currentBlock[4], backupBlock[4];
+} currentBlock[MAX_TILES], backupBlock[MAX_TILES];
 
-int figures[7][4] =
+int figures[MAX_FIGURES][MAX_TILES] =
 {
     1,3,5,7, // I
     2,4,5,7, // Z
@@ -25,13 +30,13 @@ int figures[7][4] =
 
 bool checkValidMove()
 {
-   for (int i=0;i<4;i++)
+   for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
    {
-       if (currentBlock[i].x < 0 || currentBlock[i].x >= WIDTH || currentBlock[i].y >= LENGTH) 
+       if (currentBlock[tileNum].x < 0 || currentBlock[tileNum].x >= WIDTH || currentBlock[tileNum].y >= LENGTH) 
        {
            return false;
        }
-       else if (gameGrid[currentBlock[i].y][currentBlock[i].x]) 
+       else if (gameGrid[currentBlock[tileNum].y][currentBlock[tileNum].x]) 
        {
            return false;
        }
@@ -98,16 +103,16 @@ int tetris()
     }
 
     //// <- Move -> ///
-    for (int tileNum=0;tileNum<4;tileNum++)  
+    for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
     { 
         backupBlock[tileNum]=currentBlock[tileNum]; 
         currentBlock[tileNum].x+=dx; 
     }
     if (checkValidMove() == false) 
     {
-        for (int i = 0; i < 4; i++) 
+        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
         {
-            currentBlock[i] = backupBlock[i];
+            currentBlock[tileNum] = backupBlock[tileNum];
         }
     }
 
@@ -115,7 +120,7 @@ int tetris()
     if (rotate)
       {
         Point centreRotation = currentBlock[1]; //center of rotation
-        for (int tileNum=0;tileNum<4;tileNum++)
+        for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
         {
             int x = currentBlock[tileNum].y-centreRotation.y;
             int y = currentBlock[tileNum].x-centreRotation.x;
@@ -124,9 +129,9 @@ int tetris()
         }
         if (checkValidMove() == false) 
         {
-            for (int i = 0; i < 4; i++) 
+            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
             {
-                currentBlock[i] = backupBlock[i];
+                currentBlock[tileNum] = backupBlock[tileNum];
             }
         }
       }
@@ -134,7 +139,7 @@ int tetris()
     ///////Tick//////
     if (timer>delay)
       {
-        for (int tileNum=0;tileNum<4;tileNum++) 
+        for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
         { 
             backupBlock[tileNum]=currentBlock[tileNum]; 
             currentBlock[tileNum].y+=1; 
@@ -142,14 +147,14 @@ int tetris()
 
         if (checkValidMove() == false)
         {
-            for (int tileNum=0;tileNum<4;tileNum++) 
+            for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
             {
                 gameGrid[backupBlock[tileNum].y][backupBlock[tileNum].x] = colorNum;
             }
 
-            colorNum = 1 + (rand()%7);
-            int figureType=rand()%7;
-            for (int tileNum=0;tileNum<4;tileNum++)
+            colorNum = 1 + (rand()% MAX_FIGURES);
+            int figureType=rand()% MAX_FIGURES;
+            for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
             {
                 currentBlock[tileNum].x = figures[figureType][tileNum] % 2;
                 currentBlock[tileNum].y = figures[figureType][tileNum] / 2;
@@ -194,18 +199,18 @@ int tetris()
             {
                 continue;
             }
-            tiles.setTextureRect(IntRect(gameGrid[lengthCount][widthCount] * 18, 0, 18, 18));
-            tiles.setPosition(widthCount * 18, lengthCount * 18);
-            tiles.move(28, 31); //offset
+            tiles.setTextureRect(IntRect(gameGrid[lengthCount][widthCount] * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE));
+            tiles.setPosition(widthCount * TILE_SIZE, lengthCount * TILE_SIZE);
+            tiles.move(OFFSET_X, OFFSET_Y); //offset
             window.draw(tiles);
         }
     }
 
-    for (int tileNum=0;tileNum<4;tileNum++)
+    for (int tileNum=0;tileNum< MAX_TILES;tileNum++)
       {
-        tiles.setTextureRect(IntRect(colorNum*18,0,18,18));
-        tiles.setPosition(currentBlock[tileNum].x*18,currentBlock[tileNum].y*18);
-        tiles.move(28,31); //offset
+        tiles.setTextureRect(IntRect(colorNum*TILE_SIZE,0,TILE_SIZE,TILE_SIZE));
+        tiles.setPosition(currentBlock[tileNum].x*TILE_SIZE,currentBlock[tileNum].y*TILE_SIZE);
+        tiles.move(OFFSET_X,OFFSET_Y); //offset
         window.draw(tiles);
       }
 
@@ -215,3 +220,5 @@ int tetris()
 
     return 0;
 }
+
+
