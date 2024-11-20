@@ -80,7 +80,9 @@
     <ClCompile Include="arkanoid.cpp" />
     <ClCompile Include="asteroids.cpp" />
     <ClCompile Include="bejeweled.cpp" />
+    <ClCompile Include="block.cpp" />
     <ClCompile Include="chess.cpp" />
+    <ClCompile Include="constants.cpp" />
     <ClCompile Include="doodle_jump.cpp" />
     <ClCompile Include="fifteen_puzzle.cpp" />
     <ClCompile Include="mahjong.cpp" />

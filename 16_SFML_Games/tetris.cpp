@@ -1,27 +1,14 @@
+#pragma once
+
 #include <SFML/Graphics.hpp>
 #include <time.h>
+#include "block.cpp"
+#include "constants.cpp"
+
+Point currentBlock[MAX_TILES], backupBlock[MAX_TILES];
+int gameGrid[LENGTH][WIDTH] = { 0 };
+
 using namespace sf;
-
-const int LENGTH = 20;
-const int WIDTH = 10;
-const int TILE_SIZE = 18;
-const int MAX_TILES = 4;
-const int MAX_FIGURES = 7;
-const int OFFSET_X = 28;
-const int OFFSET_Y = 31;
-
-class Block {
-public:
-    Block();
-    void blockRotation();
-    void blockMove();
-    bool checkValidMove();
-    void setDirectionX(int t_newDx) { dx = t_newDx; }
-    void setRotation(bool t_newRotate) { rotate = t_newRotate; }
-private:
-    int dx;
-    bool rotate;
-};
 
 class Game {
 public:
@@ -42,13 +29,6 @@ private:
     float timer = 0, delay = 0.3;
 };
 
-struct Point
-{
-    int x,y;
-} currentBlock[MAX_TILES], backupBlock[MAX_TILES];
-
-int gameGrid[LENGTH][WIDTH] = { 0 };
-
 int figures[MAX_FIGURES][MAX_TILES] =
 {
     1,3,5,7, // I
@@ -60,66 +40,6 @@ int figures[MAX_FIGURES][MAX_TILES] =
     2,3,4,5, // O
 };
 
-Block::Block()
-{
-    dx = 0;
-    rotate = false;
-}
-
-bool Block::checkValidMove()
-{
-    for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-    {
-        if (currentBlock[tileNum].x < 0 || currentBlock[tileNum].x >= WIDTH || currentBlock[tileNum].y >= LENGTH)
-        {
-            return false;
-        }
-        else if (gameGrid[currentBlock[tileNum].y][currentBlock[tileNum].x])
-        {
-            return false;
-        }
-    }
-
-    return true;
-};
-
-void Block::blockRotation()
-{
-    if (rotate)
-    {
-        Point centreRotation = currentBlock[1]; //center of rotation
-        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-        {
-            int x = currentBlock[tileNum].y - centreRotation.y;
-            int y = currentBlock[tileNum].x - centreRotation.x;
-            currentBlock[tileNum].x = centreRotation.x - x;
-            currentBlock[tileNum].y = centreRotation.y + y;
-        }
-        if (checkValidMove() == false)
-        {
-            for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-            {
-                currentBlock[tileNum] = backupBlock[tileNum];
-            }
-        }
-    }
-}
-
-void Block::blockMove()
-{
-    for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-    {
-        backupBlock[tileNum] = currentBlock[tileNum];
-        currentBlock[tileNum].x += dx;
-    }
-    if (checkValidMove() == false)
-    {
-        for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
-        {
-            currentBlock[tileNum] = backupBlock[tileNum];
-        }
-    }
-}
 
 Game::Game()
 {
@@ -135,10 +55,10 @@ void Game::update(sf::RenderWindow& t_window)
     processInputs(t_window);
 
     //// <- Move -> ///
-    block.blockMove();
+    block.blockMove(currentBlock, gameGrid);
 
     //////Rotate//////
-    block.blockRotation();
+    block.blockRotation(currentBlock);
 
     ///////Tick//////
     trackTimer();
@@ -269,7 +189,7 @@ void Game::trackTimer()
             currentBlock[tileNum].y += 1;
         }
 
-        if (block.checkValidMove() == false)
+        if (block.checkValidMove(currentBlock) == false)
         {
             for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
             {
