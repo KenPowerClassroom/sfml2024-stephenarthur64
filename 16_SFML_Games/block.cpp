@@ -1,19 +1,6 @@
 #pragma once
 
-#include "constants.cpp"
-
-class Block {
-public:
-    Block();
-    void blockRotation(Point* t_currentBlock, Point* t_backupBlock, int** t_gameGrid);
-    void blockMove(Point *t_currentBlock, Point* t_backupBlock, int** t_gameGrid);
-    bool checkValidMove(Point * t_currentBlock, int **t_gameGrid);
-    void setDirectionX(int t_newDx) { dx = t_newDx; }
-    void setRotation(bool t_newRotate) { rotate = t_newRotate; }
-private:
-    int dx;
-    bool rotate;
-};
+#include "block.h"
 
 Block::Block()
 {
@@ -21,7 +8,7 @@ Block::Block()
     rotate = false;
 }
 
-bool Block::checkValidMove(Point *t_currentBlock, int **t_gameGrid)
+bool Block::checkValidMove(Point *t_currentBlock, int t_gameGrid[][WIDTH])
 {
     for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
     {
@@ -38,7 +25,7 @@ bool Block::checkValidMove(Point *t_currentBlock, int **t_gameGrid)
     return true;
 };
 
-void Block::blockRotation(Point* t_currentBlock, Point* t_backupBlock, int** t_gameGrid)
+void Block::blockRotation(Point* t_currentBlock, Point* t_backupBlock, int t_gameGrid[][WIDTH])
 {
     if (rotate)
     {
@@ -60,7 +47,7 @@ void Block::blockRotation(Point* t_currentBlock, Point* t_backupBlock, int** t_g
     }
 }
 
-void Block::blockMove(Point* t_currentBlock, Point* t_backupBlock, int** t_gameGrid)
+void Block::blockMove(Point* t_currentBlock, Point* t_backupBlock, int t_gameGrid[][WIDTH])
 {
     for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
     {

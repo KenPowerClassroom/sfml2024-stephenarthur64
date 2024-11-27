@@ -1,33 +1,11 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <time.h>
-#include "block.cpp"
-#include "constants.cpp"
+#include "tetris.h"
 
 Point currentBlock[MAX_TILES], backupBlock[MAX_TILES];
 int gameGrid[LENGTH][WIDTH] = { 0 };
 
 using namespace sf;
-
-class Game {
-public:
-    Game();
-    void update(sf::RenderWindow& t_window);
-    void draw(sf::RenderWindow& t_window);
-    void drawTiles(int t_posX, int t_posY, int t_tile, sf::Sprite t_tileSprite, sf::RenderWindow& t_window);
-    void setupSprites();
-    void processInputs(sf::RenderWindow& t_window);
-    void checkLines();
-    void trackTimer();
-private:
-    Block block;
-    Clock clock;
-    Sprite tiles, background, frame;
-    Texture tilesTexture, backgroundTexture, frameTexture;
-    int colorNum = 1;
-    float timer = 0, delay = 0.3;
-};
 
 int figures[MAX_FIGURES][MAX_TILES] =
 {
@@ -55,10 +33,10 @@ void Game::update(sf::RenderWindow& t_window)
     processInputs(t_window);
 
     //// <- Move -> ///
-    block.blockMove(currentBlock, gameGrid);
+    block.blockMove(currentBlock, backupBlock, gameGrid);
 
     //////Rotate//////
-    block.blockRotation(currentBlock);
+    block.blockRotation(currentBlock, backupBlock, gameGrid);
 
     ///////Tick//////
     trackTimer();
@@ -189,7 +167,7 @@ void Game::trackTimer()
             currentBlock[tileNum].y += 1;
         }
 
-        if (block.checkValidMove(currentBlock) == false)
+        if (block.checkValidMove(currentBlock, gameGrid) == false)
         {
             for (int tileNum = 0; tileNum < MAX_TILES; tileNum++)
             {
